@@ -1,0 +1,33 @@
+extend type Query {
+    users: [User!]! @all
+    user(id: ID! @eq): User @find
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+    tasks: [Task!]! @hasMany
+}
+
+
+# type Mutation {
+#     createUser(
+#         name: String!
+#         email: String! @rules(apply: ["email", "unique:users"])
+#         password: String! @rules(apply: ["min:8"])
+#     ): User! @create
+
+#     # updateTask(id: ID!, name: String, email: String): User! @update
+#     # deleteTask(id: ID!): User @delete
+
+# }
+
+# input CreateUserInput{
+#     name: String!
+#     email: String! @rules(apply:["email","unique:users,email"])
+#     password: String! @hash @rules(apply:["min:5"])
+# }
+

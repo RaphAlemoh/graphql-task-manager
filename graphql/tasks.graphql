@@ -1,0 +1,22 @@
+type Query {
+    tasks: [Task!]! @all
+    task(id: ID! @eq): Task! @find
+}
+
+type Task {
+    id: ID!
+    title: String!
+    description: String!
+    status: String!
+    due_date: DateTime!
+    created_at: DateTime!
+    updated_at: DateTime!
+    user: User! @belongsTo
+    category: Category @belongsTo
+}
+
+type Category {
+    id: ID!
+    name: String!
+    tasks: [Task!]! @hasMany
+}
