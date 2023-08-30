@@ -10,9 +10,22 @@
                 >Back</router-link
               >
             </div>
+            <div v-if="error">
+              <span v-for="(err, i) of error.graphQLErrors" :key="i">
+                <ul v-if="err.extensions.validation">
+                  <li
+                    v-for="(message, index) of err.extensions.validation"
+                    :key="index"
+                    class="text-danger"
+                  >
+                    {{ message[0] }}
+                  </li>
+                </ul>
+              </span>
+            </div>
 
             <div class="card-body">
-              <form @submit.prevent="storeTask">
+              <form @submit.prevent="saveForm">
                 <div class="form-group row mb-2">
                   <label
                     for="name"
@@ -101,42 +114,60 @@
 </template>
 
 <script>
+import { useQuery, useMutation } from "@vue/apollo-composable";
+import { TASKS_QUERY, CREATE_TASK } from "../../graphql/task";
+import { reactive, ref } from "vue";
+
 export default {
-  data() {
-    return {
-      tasks: [],
-      form: {
-        title: "",
-        description: "",
-        status: "",
-        due_date: "",
+  setup() {
+    const form = reactive({
+      title: "",
+      description: "",
+      status: "",
+      due_date: "",
+    });
+
+    const {
+      mutate: createTask,
+      error,
+      loading: createLoading,
+    } = useMutation(CREATE_TASK, () => ({
+      update: (cache, { data: { createTask } }) => {
+        let data = cache.readQuery({ query: TASKS_QUERY });
+        data = {
+          ...data,
+          tasks: {
+            data: [...data.tasks, createTask],
+            __typename: data.tasks.__typename,
+          },
+        };
+        cache.writeQuery({ query: TASKS_QUERY, data });
       },
+    }));
+
+    const saveForm = () => {
+      let data = {
+        title: form.title,
+        description: form.description,
+        status: form.status,
+        due_date: form.due_date,
+      };
+      createTask(data);
+      resetForm();
     };
-  },
-  created() {
-    this.getTasks();
-  },
-  methods: {
-    getTasks() {
-      axios
-        .get("/api/tasks")
-        .then((res) => {
-          this.tasks = res.data.data;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-    storeTask() {
-      axios
-        .post("/api/tasks", this.form)
-        .then((res) => {
-          this.$router.push({ name: "tasks" });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
+    const resetForm = () => {
+      form.title = "";
+      form.description = "";
+      form.status = "";
+      form.due_date = "";
+    };
+
+    return {
+      form,
+      saveForm,
+      error,
+      createLoading,
+    };
   },
 };
 </script>

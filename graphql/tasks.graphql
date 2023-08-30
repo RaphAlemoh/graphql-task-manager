@@ -1,6 +1,38 @@
-type Query {
-    tasks: [Task!]! @all
-    task(id: ID! @eq): Task! @find
+extend type Query {
+    tasks (status: String): [Task!]! @all(model: "App\\Models\\Task")
+    # tasks (status: String): [Task!]! @all(model: "App\\Models\\Task") @guard(with: ["api"])
+    task(id: ID! @eq): Task! @find(model: "App\\Models\\Task")
+    filterTasks(status: String!): [Task!]! @all(model: "App\\Models\\Task")
+}
+
+extend type Mutation {
+    createTask(input: createTaskInput! @spread): Task
+        @create(model: "App\\Models\\Task")
+
+    updateTask(input: updateTaskInput! @spread): Task
+        @update(model: "App\\Models\\Task")
+
+    deleteTask(id: ID! @rules(apply: ["required"]) @whereKey): Task
+        @delete(model: "App\\Models\\Task")
+}
+
+input createTaskInput {
+    title: String @rules(apply: ["required", "string", "max:255"])
+    description: String @rules(apply: ["required", "string", "max:255"])
+    status: String @rules(apply: ["required", "string", "max:255"])
+    category_id: ID @rules(apply: ["nullable", "string", "max:255"])
+    user_id: ID @rules(apply: ["nullable", "string", "max:255"])
+    due_date: Date @rules(apply: ["required"])
+}
+
+input updateTaskInput {
+    id: ID! @rules(apply: ["required", "string"])
+    title: String @rules(apply: ["required", "string", "max:255"])
+    description: String @rules(apply: ["required", "string", "max:255"])
+    status: String @rules(apply: ["required", "string", "max:255"])
+    user_id: ID @rules(apply: ["nullable", "string", "max:255"])
+    category_id: ID @rules(apply: ["nullable", "integer"])
+    due_date: Date @rules(apply: ["required"])
 }
 
 type Task {
@@ -8,15 +40,9 @@ type Task {
     title: String!
     description: String!
     status: String!
+    user_id: String
     due_date: DateTime!
-    created_at: DateTime!
-    updated_at: DateTime!
-    user: User! @belongsTo
+    category_id: ID
+    user: User @belongsTo
     category: Category @belongsTo
-}
-
-type Category {
-    id: ID!
-    name: String!
-    tasks: [Task!]! @hasMany
 }

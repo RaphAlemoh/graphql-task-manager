@@ -16,13 +16,11 @@
               </div>
             </div>
           </div>
-          <div class="row">
-            <div v-if="showMessage">
-              <div class="alert alert-success">{{ message }}</div>
-            </div>
+          <div v-if="loading" class="text-center">Loading...</div>
+          <div class="row" v-else-if="result && result.tasks">
             <div class="card mx-auto">
               <div class="card-header bg-none">
-                  <h4>ApTiw Tasks</h4>
+                <h4>ApTiw Tasks</h4>
               </div>
               <div class="card-body">
                 <div
@@ -34,7 +32,6 @@
                         <input
                           class="form-control"
                           type="search"
-                          v-model.lazy="search"
                           placeholder="Search by title or description"
                           aria-describedby="button-addon2"
                         />
@@ -87,7 +84,7 @@
                     </div>
                   </div>
                 </div>
-                <table class="table">
+                <table class="table table-bordered">
                   <thead>
                     <tr>
                       <th scope="col">#Id</th>
@@ -97,7 +94,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="task in tasks" :key="task.id">
+                    <tr v-for="task in result.tasks" :key="task.id">
                       <th scope="row">#{{ task.id }}</th>
                       <td>{{ task.title }}</td>
                       <td>
@@ -142,51 +139,98 @@
 </template>
 
 <script>
+import { useQuery, useMutation } from "@vue/apollo-composable";
+import { TASKS_QUERY, DELETE_TASK, FILTER_TASKS } from "../../graphql/task";
+import { reactive, ref } from "vue";
+
 export default {
-  data() {
+  setup() {
+    const task_id = ref(null);
+    const delete_task_id = ref(null);
+
+    const { result, loading } = useQuery(TASKS_QUERY);
+
+    const { mutate: removeTask } = useMutation(DELETE_TASK, () => ({
+      update: (cache, { data: { removeTask } }) => {
+        let data = cache.readQuery({ query: TASKS_QUERY });
+
+        const delete_task = data.tasks.find(
+          (task) => task.id == delete_task_id.value
+        );
+
+        cache.evict({ id: cache.identify(delete_task) });
+      },
+    }));
+
+    // const { query: filterUserTasks } = useQuery(FILTER_TASKS, () => ({
+    //   update: (cache, { data: { filterUserTasks } }) => {
+    //     let data = cache.readQuery({ query: TASKS_QUERY });
+    //     // result = data
+    //   },
+    // }));
+
+    const deleteTask = (id) => {
+      delete_task_id.value = id;
+      removeTask({ id: id });
+    };
+
+    const filterTasks = (status) => {
+      // filterUserTasks({ status: status });
+    };
+
     return {
-      tasks: [],
-      showMessage: false,
-      message: "",
-      search: null,
+      result,
+      loading,
+      deleteTask,
+      filterTasks,
     };
   },
-  watch: {
-    search() {
-      this.getTasks();
-    },
-  },
-  created() {
-    this.getTasks();
-  },
-  methods: {
-    getTasks() {
-      axios
-        .get("/api/tasks", {
-          params: {
-            search: this.search,
-          },
-        })
-        .then((res) => {
-          this.tasks = res.data.data;
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    },
-    deleteTask(id) {
-      axios.delete("api/tasks/" + id).then((res) => {
-        this.showMessage = true;
-        this.message = res.data;
-        this.getTasks();
-      });
-    },
-    filterTasks(filter) {
-      // this.tasks = this.tasks.find(el => el.status === filter)
-      this.tasks = _.find(this.tasks, { status: filter });
-    },
-  },
 };
+// export default {
+//   data() {
+//     return {
+//       tasks: [],
+//       showMessage: false,
+//       message: "",
+//       search: null,
+//     };
+//   },
+//   watch: {
+//     search() {
+//       this.getTasks();
+//     },
+//   },
+//   created() {
+//     this.getTasks();
+//   },
+//   methods: {
+//     getTasks() {
+//       axios
+//         .get("/api/tasks", {
+//           params: {
+//             search: this.search,
+//           },
+//         })
+//         .then((res) => {
+//           this.tasks = res.data.data;
+//         })
+//         .catch((error) => {
+//           console.log(error);
+//         });
+//     },
+//     deleteTask(id) {
+//       axios.delete("api/tasks/" + id).then((res) => {
+//         this.showMessage = true;
+//         this.message = res.data;
+//         this.getTasks();
+//       });
+//     },
+//     filterTasks(filter) {
+//       // this.tasks = this.tasks.find(el => el.status === filter)
+//       this.tasks = _.find(this.tasks, { status: filter });
+//     },
+//   },
+// };
 </script>
 
 <style scoped>

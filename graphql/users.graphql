@@ -1,33 +1,30 @@
 extend type Query {
-    users: [User!]! @all
-    user(id: ID! @eq): User @find
+    users: [User!]! @all(model: "App\\Models\\User")
+    user(id: ID! @eq): User @find(model: "App\\Models\\User")
+}
+
+type Mutation {
+    createUser(
+        name: String!
+        email: String! @rules(apply: ["email", "unique:users"])
+        password: String! @hash @rules(apply: ["required", "min:8"])
+    ): User! @create(model: "App\\Models\\User")
+
+    # login(email: String!, password: String!): String!
 }
 
 type User {
     id: ID!
     name: String!
     email: String!
+    token: String
     created_at: DateTime!
     updated_at: DateTime!
     tasks: [Task!]! @hasMany
 }
 
-
-# type Mutation {
-#     createUser(
-#         name: String!
-#         email: String! @rules(apply: ["email", "unique:users"])
-#         password: String! @rules(apply: ["min:8"])
-#     ): User! @create
-
-#     # updateTask(id: ID!, name: String, email: String): User! @update
-#     # deleteTask(id: ID!): User @delete
-
-# }
-
-# input CreateUserInput{
-#     name: String!
-#     email: String! @rules(apply:["email","unique:users,email"])
-#     password: String! @hash @rules(apply:["min:5"])
-# }
-
+type Category {
+    id: ID!
+    name: String!
+    tasks: [Task!]! @hasMany
+}
