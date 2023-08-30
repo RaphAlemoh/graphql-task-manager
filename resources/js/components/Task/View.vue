@@ -5,7 +5,8 @@
         <div class="col-md-8">
           <div class="card text-center">
             <div class="card-header">My Task Title</div>
-            <div class="card-body" v-if="result.task != ''">
+            <div v-if="loading" class="text-center">Loading...</div>
+            <div class="card-body" v-else-if="result && result.task">
               <h5 class="card-title">{{ result.task.title }}</h5>
               <p class="card-text">
                 {{ result.task.description }}
@@ -25,12 +26,19 @@
 </template>
   
   <script>
-  import { useQuery, useMutation } from "@vue/apollo-composable";
-import { TASK_QUERY} from "../../graphql/task";
-// import { reactive, ref } from "vue";
+import { useQuery } from "@vue/apollo-composable";
+import { TASK_QUERY } from "../../graphql/task";
+import { useRoute } from "vue-router";
+
 export default {
   setup() {
-    const { result, loading } = useQuery(TASK_QUERY);
+    const route = useRoute();
+
+    const id = route.params.id;
+
+    const { result, loading } = useQuery(TASK_QUERY, {
+      id: id,
+    });
 
     return {
       result,
@@ -38,28 +46,6 @@ export default {
     };
   },
 };
-// export default {
-  // data() {
-  //   return {
-  //     task: {},
-  //   };
-  // },
-  // created() {
-  //   this.getTask();
-  // },
-  // methods: {
-  //   getTask() {
-  //     axios
-  //       .get("/api/tasks/" + this.$route.params.id)
-  //       .then((res) => {
-  //         this.task = res.data;
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //       });
-  //   },
-  // },
-// };
 </script>
   
   <style></style>

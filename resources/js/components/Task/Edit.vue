@@ -116,8 +116,8 @@
 
 <script>
 import { useQuery, useMutation } from "@vue/apollo-composable";
-import { TASKS_QUERY, UPDATE_TASK } from "../../graphql/task";
-import { reactive, ref } from "vue";
+import { TASK_QUERY, UPDATE_TASK } from "../../graphql/task";
+import { reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 export default {
@@ -130,12 +130,29 @@ export default {
       due_date: "",
     });
 
+    const id = route.params.id;
 
-    const { result, loading } = useQuery(TASKS_QUERY);
+    const { result, loading } = useQuery(TASK_QUERY, {
+      id: id,
+    });
 
-    const { mutate: updateTask } = useMutation(UPDATE_TASK, () => ({
+    watch(() => {
+      const data = result.value?.task ?? "";
+      if (data) {
+        form.title = data.title;
+        form.description = data.description;
+        form.status = data.status;
+        form.due_date = data.due_date;
+      }
+    });
+
+    const {
+      mutate: updateTask,
+      error,
+      loading: createLoading,
+    } = useMutation(UPDATE_TASK, () => ({
       update: (cache, { data: { updateTask } }) => {
-        let data = cache.readQuery({ query: TASKS_QUERY });
+        let data = cache.readQuery({ query: TASK_QUERY });
         let updated_data = data.tasks.map((task) => {
           if (task.id == updateTask.id) {
             return updateTask;
@@ -146,7 +163,7 @@ export default {
           tasks: { data: updated_data, __typename: data.tasks.__typename },
         };
 
-        cache.writeQuery({ query: TASKS_QUERY, data });
+        cache.writeQuery({ query: TASK_QUERY, data });
       },
     }));
 
@@ -161,16 +178,6 @@ export default {
       resetForm();
     };
 
-    const editTask = () => {
-      const id = route.params.id;
-      console.log(result)
-      const data = result.value.tasks.find((task) => task.id == id);
-      form.title = data.title;
-      form.description = data.description;
-      form.status = data.status;
-      form.due_date = data.due_date;
-    };
-
     const resetForm = () => {
       form.title = "";
       form.description = "";
@@ -181,9 +188,10 @@ export default {
     return {
       result,
       loading,
+      error,
+      createLoading,
       form,
       updateTaskForm,
-      editTask,
     };
   },
 };

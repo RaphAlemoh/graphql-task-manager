@@ -1,5 +1,5 @@
 extend type Query {
-    tasks (status: String): [Task!]! @all(model: "App\\Models\\Task")
+    tasks: [Task!]! @all(model: "App\\Models\\Task")
     # tasks (status: String): [Task!]! @all(model: "App\\Models\\Task") @guard(with: ["api"])
     task(id: ID! @eq): Task! @find(model: "App\\Models\\Task")
     filterTasks(status: String!): [Task!]! @all(model: "App\\Models\\Task")
@@ -41,7 +41,7 @@ type Task {
     description: String!
     status: String!
     user_id: String
-    due_date: DateTime!
+    due_date: Date!
     category_id: ID
     user: User @belongsTo
     category: Category @belongsTo

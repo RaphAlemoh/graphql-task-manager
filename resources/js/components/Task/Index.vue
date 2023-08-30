@@ -145,7 +145,6 @@ import { reactive, ref } from "vue";
 
 export default {
   setup() {
-    const task_id = ref(null);
     const delete_task_id = ref(null);
 
     const { result, loading } = useQuery(TASKS_QUERY);

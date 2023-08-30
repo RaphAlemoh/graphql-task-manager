@@ -19,24 +19,21 @@ export const TASKS_QUERY = gql`
     }
 `
 
-// export const TASK_QUERY = gql`
-//     query task ($id : ID!) {
-//         task (id : $id){
-//             id
-//             title
-//             description
-//             status
-//             due_date
-//             category {
-//               id
-//               name
-//             }
-//             user{
-//               name
-//             }
-//           }
-//     }
-// `
+export const TASK_QUERY = gql`
+    query task ($id : ID!) {
+        task (id : $id){
+            id
+            title
+            description
+            status
+            due_date
+            category {
+              id
+              name
+            }
+          }
+    }
+`
 
 export const CREATE_TASK = gql`
   mutation createTask(
