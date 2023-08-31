@@ -84,7 +84,7 @@ export default {
       e.preventDefault();
       if (this.password.length > 0) {
         axios
-          .post("login", {
+          .post("api/login", {
             email: this.email,
             password: this.password,
           })
