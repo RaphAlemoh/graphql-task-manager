@@ -23,9 +23,11 @@ if (token) {
 }
 
 
+window.axios.defaults.headers.common["Content-Type"] = "application/json";
+window.axios.defaults.headers.common["Accept"] = "application/json";
+
 let user_token = window.localStorage.getItem("token");
 if (user_token) {
-    window.axios.defaults.headers.common["Content-Type"] = "application/json";
     window.axios.defaults.headers.common["Authorization"] = "Bearer " + user_token;
 }
 
