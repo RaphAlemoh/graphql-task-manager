@@ -101,9 +101,11 @@ export default {
   },
   methods: {
     async logout() {
-      await axios.post("/logout").then((response) => {
+      await axios.get("api/logout").then((response) => {
         localStorage.clear();
         this.$router.go("/login");
+      }).catch((err) => {
+        console.log(err)
       });
     },
   },
