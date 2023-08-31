@@ -7,7 +7,7 @@ dotenv.config();
 
 export default defineConfig({
     define: {
-        VITE_APP_URL : `"${process.env.APP_URL}"`,
+        VITE_GRAPHQL_URL : `"${process.env.GRAPHQL_URL}"`,
     },
     plugins: [
         vue(),

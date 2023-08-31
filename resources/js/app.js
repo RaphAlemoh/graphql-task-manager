@@ -8,7 +8,7 @@ import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client/core
 import App from "./components/layouts/App.vue";
 
 const httpLink = createHttpLink({
-    uri: VITE_APP_URL,
+    uri: VITE_GRAPHQL_URL,
 })
 
 const cache = new InMemoryCache()
